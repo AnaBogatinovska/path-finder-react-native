@@ -77,6 +77,30 @@ export async function getActivities(): Promise<Activity[]> {
   }
 }
 
+export async function getActivityById(id: number): Promise<Activity | null> {
+  if (!db) return null
+
+  type Row = {
+    id: number
+    date: string
+    distance: number
+    duration: number
+    coordinates: string
+  }
+
+  try {
+    const row = await db.getFirstAsync<Row>(
+      'SELECT id, date, distance, duration, coordinates FROM activities WHERE id = ?',
+      [id],
+    )
+    if (!row) return null
+    return { ...row, coordinates: JSON.parse(row.coordinates) as ActivityCoordinate[] }
+  } catch (error) {
+    logger.error('Failed to fetch activity by id', error)
+    return null
+  }
+}
+
 export async function deleteActivity(id: number): Promise<void> {
   if (!db) throw new AppError('UNKNOWN', 'Database not initialised.')
   await db.runAsync('DELETE FROM activities WHERE id = ?', [id])
