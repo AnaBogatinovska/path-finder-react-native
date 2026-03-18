@@ -57,7 +57,8 @@
           "locationAlwaysAndWhenInUsePermission": "Path Finder needs your location for real-time navigation.",
           "isIosBackgroundLocationEnabled": false
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

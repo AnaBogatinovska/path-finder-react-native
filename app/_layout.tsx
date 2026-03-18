@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { initDatabase } from '@/services/activity-service'
 import { logger } from '@/utils/logger'
 
 export const unstable_settings = {
@@ -15,12 +16,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme()
 
   useEffect(() => {
+    // Initialise SQLite on first mount
+    void initDatabase()
+
     // Global handler for unhandled JS errors
     const previous = ErrorUtils.getGlobalHandler()
 
     ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
       logger.error(`Unhandled error (fatal: ${isFatal ?? false})`, error)
-      // Delegate to the default handler so RN error overlay still shows in dev
       previous(error, isFatal)
     })
 

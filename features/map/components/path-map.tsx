@@ -9,6 +9,7 @@ import {
   USER_LOCATION_REGION_DELTA,
 } from '@/constants/map'
 import { useMapStore } from '@/store/use-map-store'
+import { ActivityPolyline } from '@/features/activity/components/activity-polyline'
 
 import { RecenterButton } from './recenter-button'
 
@@ -97,6 +98,7 @@ export function PathMap() {
           flipY={false}
           zIndex={-1}
         />
+        <ActivityPolyline />
       </MapView>
 
       <RecenterButton
