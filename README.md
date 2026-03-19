@@ -1,50 +1,105 @@
-# Welcome to your Expo app 👋
+# Path Finder
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native GPS activity tracking app built with Expo. Record your walks and runs, see your path drawn live on the map, and review past activities with a full route replay.
 
-## Get started
+---
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- Real-time map powered by MapTiler
+- Live GPS location tracking with a blue dot
+- Start/Stop activity recording with a live polyline drawn on the map
+- Live stats: duration and distance while tracking
+- Activity history stored locally with SQLite
+- Detail view for each past activity with a static route map
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## How to Run the Project
 
-In the output, you'll find options to open the app in a
+### Prerequisites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js 18+
+- Xcode (for iOS simulator or device)
+- An Apple Developer account (free is enough for device testing)
+- A [MapTiler](https://cloud.maptiler.com) API key (free tier available)
+- A Google Maps API key (required for the Android Maps SDK — [get one here](https://console.cloud.google.com))
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Clone and install dependencies
 
 ```bash
-npm run reset-project
+git clone https://github.com/anabogatinovska/path-finder-react-native.git
+cd path-finder-react-native
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Set up environment variables
 
-## Learn more
+```bash
+cp .env.example .env.local
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Open `.env.local` and fill in your keys:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+EXPO_PUBLIC_MAPTILER_API_KEY=your_maptiler_key
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
+```
 
-## Join the community
+Also paste the Google Maps key into `app.json` under `android.config.googleMaps.apiKey`.
 
-Join our community of developers creating universal apps.
+### 3. Run on iOS Simulator
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo run:ios
+```
+
+### 4. Run on a Physical iOS Device
+
+Connect your iPhone via USB, trust the Mac on the device, then:
+
+```bash
+npx expo run:ios --device
+```
+
+Once the build is installed, start Metro and open the app:
+
+```bash
+npx expo start
+```
+
+> Your iPhone and Mac must be on the same WiFi network, or run `npx expo start --tunnel` as an alternative.
+
+### 5. Run on Android
+
+```bash
+npx expo run:android
+```
+
+---
+
+## AI Tools Used
+
+### Claude (Anthropic) — Claude Code
+
+The entire project was built through a conversation with **Claude Code**, Anthropic's AI coding assistant used directly inside VS Code.
+
+**How it helped:**
+
+- **Architecture decisions** — Before writing a single line, Claude recommended the state management approach (Zustand over Redux/Context for this scale) and the styling solution (NativeWind), with clear reasoning for each choice.
+- **Project scaffolding** — Claude set up the full clean architecture from scratch: `features/`, `services/`, `store/`, `utils/`, `types/` layers with strict separation of concerns, following a `CLAUDE.md` guidelines file it also authored.
+- **Feature implementation** — Each feature (map integration, activity tracking, history screen) was implemented end-to-end by Claude: service layer, Zustand store, hooks, and UI components.
+- **Debugging** — When native errors appeared (e.g. `Cannot find native module 'ExpoSQLite'`, `InvalidHostID` on device install, the Metro "Refreshing..." loop), Claude diagnosed the root cause and provided the exact fix.
+- **Decision guidance** — When facing choices like SQLite vs AsyncStorage, Claude gave a structured comparison tied to the specific use case rather than a generic answer.
+
+---
+
+## Biggest Challenge During Vibe Coding
+
+The biggest challenge was **trusting the process without losing architectural control**.
+
+Vibe coding moves fast — Claude would generate entire feature layers in one response, and the temptation was to just accept everything and keep going. The real discipline was in slowing down at key decision points: reading the generated code, understanding the data flow, and asking "does this actually follow the architecture we agreed on?" before moving to the next feature.
+
+A concrete example: the `onPanDrag` + `followsUserLocation` conflict in the map component. On iOS, enabling both native camera following and manual `animateToRegion` caused the map to fire `onPanDrag` during programmatic animations, which silently disabled the follow mode. The symptom (Metro "Refreshing..." banner flickering) looked completely unrelated to the actual bug. Without understanding the underlying react-native-maps event system, the AI-suggested code would have looked correct but behaved wrongly in production.
+
+The lesson: vibe coding is most effective when you treat the AI as a senior pair programmer, not an autopilot. You still need to own the understanding of what is being built.
